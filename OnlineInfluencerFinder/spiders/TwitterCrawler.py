@@ -3,7 +3,7 @@ import logging
 
 import scrapy
 
-from OnlineInfluencerFinder.items import TwitterUser
+from OnlineInfluencerFinder.items import OnlineInfluencer
 
 
 class TwitterCrawlerSpider(scrapy.Spider):
@@ -23,8 +23,7 @@ class TwitterCrawlerSpider(scrapy.Spider):
             'x-csrf-token': 'a871a2bdd27b50564468aaa19d94ad03981b1d24245184ae21d66fe8c189c7bc13c098814a9bbe4c229dc01a32bd5498a2ec9e3d9d4108d4621aa8002f6d30bb144c46e9876242e18c97467dc94d2886'
         },
         'CONCURRENT_REQUESTS': 5,
-        'DOWNLOAD_DELAY': 2,
-        'LOG_LEVEL': 'INFO'
+        'DOWNLOAD_DELAY': 2
     }
 
     def start_requests(self):
@@ -36,8 +35,10 @@ class TwitterCrawlerSpider(scrapy.Spider):
 
     def parse(self, response):
         users = json.loads(response.body)['globalObjects']['users']
-        for key, user in users.items():
-            user_info = TwitterUser()
-            user_info['screen_name'] = user['screen_name']
-            user_info['followers_count'] = user['followers_count']
-            print(user_info)
+        for influencer in users.values():
+            user_info = OnlineInfluencer()
+            user_info['id'] = influencer['screen_name']
+            user_info['name'] = influencer['name']
+            user_info['following_count'] = influencer['friends_count']
+            user_info['followers_count'] = influencer['followers_count']
+            yield influencer

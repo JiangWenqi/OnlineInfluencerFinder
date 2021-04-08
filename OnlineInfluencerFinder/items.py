@@ -6,12 +6,13 @@
 import scrapy
 
 
-class OnlineInfluencerFinderItem(scrapy.Item):
+class OnlineInfluencer(scrapy.Item):
     # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
-
-
-class TwitterUser(scrapy.Item):
-    screen_name = scrapy.Field()
+    platform = scrapy.Field()
+    id = scrapy.Field()
+    name = scrapy.Field()
+    following_count = scrapy.Field()
     followers_count = scrapy.Field()
+
+
+
