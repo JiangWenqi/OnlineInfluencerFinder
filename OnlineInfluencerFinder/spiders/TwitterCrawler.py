@@ -13,7 +13,7 @@ class TwitterCrawlerSpider(scrapy.Spider):
     allowed_domains = ['twitter.com']
     platform = 'twitter'
     tag = 'Tesla'
-    url_prefix = (
+    url = (
         'https://twitter.com/i/api/2/search/adaptive.json?include_profile_interstitial_type=1'
         '&include_blocking=1'
         '&include_blocked_by=1'
@@ -40,6 +40,7 @@ class TwitterCrawlerSpider(scrapy.Spider):
         '&pc=1'
         '&spelling_corrections=1'
         '&ext=mediaStats%2ChighlightedLabel'
+        f'&q={quote(tag)}'
     )
 
     # 1. copy cookies from your browser
@@ -57,23 +58,15 @@ class TwitterCrawlerSpider(scrapy.Spider):
         'DOWNLOAD_DELAY': 2
     }
 
-    def start_requests(self, cursor=None):
-
-        if cursor:
-            url = self.url_prefix + '&q={query}' + '&cursor={cursor}'
-            # Fill in the query content
-            url = url.format(query=quote(self.tag), cursor=quote(cursor))
-        else:
-            url = self.url_prefix + '&q={query}'
-            url = url.format(query=quote(self.tag))
-        print(url)
-
+    # default beginning method when start this spider
+    def start_requests(self):
         yield scrapy.Request(
-            url,
+            self.url,
             callback=self.parse,
             cookies=self.cookies
         )
 
+    # the main method to extract content
     def parse(self, response):
         users = json.loads(response.body)['globalObjects']['users']
         for user in users.values():
@@ -86,6 +79,12 @@ class TwitterCrawlerSpider(scrapy.Spider):
             user_info['followers_count'] = user['followers_count']
             yield user_info
         # go to next page
-        cursor = re.compile('"(scroll:[^"]*)"').search(response.text).group(1)
-        for r in self.start_requests(cursor=cursor):
-            yield r
+        cursor = re.compile("(scroll:[^\"]*)").search(response.text).group(1)
+        # Fill in the query content
+        if cursor:
+            next_url = self.url + f'&cursor={quote(cursor)}'
+            yield scrapy.Request(
+                next_url,
+                callback=self.parse,
+                cookies=self.cookies
+            )
