@@ -10,4 +10,5 @@ from itemadapter import ItemAdapter
 
 class OnlineInfluencerFinderPipeline:
     def process_item(self, item, spider):
+        print(item['id'])
         return item

@@ -6,9 +6,10 @@
 import scrapy
 
 
-class OnlineInfluencer(scrapy.Item):
+class UerInfo(scrapy.Item):
     # define the fields for your item here like:
     platform = scrapy.Field()
+    tag = scrapy.Field()
     id = scrapy.Field()
     name = scrapy.Field()
     following_count = scrapy.Field()
