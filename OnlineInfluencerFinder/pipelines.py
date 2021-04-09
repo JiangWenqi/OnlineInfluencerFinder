@@ -5,10 +5,21 @@
 
 
 # useful for handling different item types with a single interface
+from time import time
+
 from itemadapter import ItemAdapter
+
+from OnlineInfluencerFinder.items import OnlineInfluencer
 
 
 class OnlineInfluencerFinderPipeline:
     def process_item(self, item, spider):
-        print(item['id'])
-        return item
+        influencer = OnlineInfluencer()
+        influencer['created_time'] = time()
+        influencer['updated_time'] = time()
+        for (key, value) in item.items():
+            influencer[key] = value
+        if spider.name == 'twitter':
+            influencer['platform'] = 'TWITTER'
+        print(influencer)
+        return influencer

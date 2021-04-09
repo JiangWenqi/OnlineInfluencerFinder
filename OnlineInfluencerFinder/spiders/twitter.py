@@ -5,13 +5,12 @@ from urllib.parse import quote
 
 import scrapy
 
-from OnlineInfluencerFinder.items import UerInfo
+from OnlineInfluencerFinder.items import TwitterUser
 
 
 class TwitterCrawlerSpider(scrapy.Spider):
-    name = 'twitter_crawler'
+    name = 'twitter'
     allowed_domains = ['twitter.com']
-    platform = 'twitter'
     tag = 'Tesla'
     url = (
         'https://twitter.com/i/api/2/search/adaptive.json?include_profile_interstitial_type=1'
@@ -55,7 +54,7 @@ class TwitterCrawlerSpider(scrapy.Spider):
             'x-csrf-token': 'a871a2bdd27b50564468aaa19d94ad03981b1d24245184ae21d66fe8c189c7bc13c098814a9bbe4c229dc01a32bd5498a2ec9e3d9d4108d4621aa8002f6d30bb144c46e9876242e18c97467dc94d2886'
         },
         'CONCURRENT_REQUESTS': 5,
-        'DOWNLOAD_DELAY': 2
+        'DOWNLOAD_DELAY': 10  # per request waiting seconds
     }
 
     # default beginning method when start this spider
@@ -70,14 +69,13 @@ class TwitterCrawlerSpider(scrapy.Spider):
     def parse(self, response):
         users = json.loads(response.body)['globalObjects']['users']
         for user in users.values():
-            user_info = UerInfo()
-            user_info['platform'] = self.platform
-            user_info['tag'] = self.tag
-            user_info['id'] = user['screen_name']
-            user_info['name'] = user['name']
-            user_info['following_count'] = user['friends_count']
-            user_info['followers_count'] = user['followers_count']
-            yield user_info
+            twitter_user = TwitterUser()
+            twitter_user['tag'] = self.tag
+            twitter_user['id'] = user['screen_name']
+            twitter_user['name'] = user['name']
+            twitter_user['following_count'] = user['friends_count']
+            twitter_user['followers_count'] = user['followers_count']
+            yield twitter_user
         # go to next page
         cursor = re.compile("(scroll:[^\"]*)").search(response.text).group(1)
         # Fill in the query content
